@@ -625,7 +625,9 @@ static void shrink_dcache_for_umount_subtree(struct dentry *dentry)
 
 	/* detach this root from the system */
 	spin_lock(&dcache_lock);
+	//delete dentry in lru list
 	dentry_lru_del_init(dentry);
+	//remove dentry from hash list
 	__d_drop(dentry);
 	spin_unlock(&dcache_lock);
 
@@ -2187,6 +2189,7 @@ int is_subdir(struct dentry *new_dentry, struct dentry *old_dentry)
 	return result;
 }
 
+//atomic_dec all the dentries
 void d_genocide(struct dentry *root)
 {
 	struct dentry *this_parent = root;
@@ -2194,6 +2197,7 @@ void d_genocide(struct dentry *root)
 
 	spin_lock(&dcache_lock);
 repeat:
+	//get child
 	next = this_parent->d_subdirs.next;
 resume:
 	while (next != &this_parent->d_subdirs) {

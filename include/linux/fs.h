@@ -1121,6 +1121,7 @@ struct super_block {
 	unsigned long		s_flags;
 	unsigned long		s_magic;
 	struct dentry		*s_root;
+	//the semaphore which is used in umounting
 	struct rw_semaphore	s_umount;
 	struct mutex		s_lock;
 	int			s_count;
@@ -1538,8 +1539,10 @@ int sync_inode(struct inode *inode, struct writeback_control *wbc);
 struct file_system_type {
 	const char *name;
 	int fs_flags;
+	//must be defined, it is be used in vfs_kern_mount
 	int (*get_sb) (struct file_system_type *, int,
 		       const char *, void *, struct vfsmount *);
+	//must be defined, it is be used in deactivate_super
 	void (*kill_sb) (struct super_block *);
 	struct module *owner;
 	struct file_system_type * next;

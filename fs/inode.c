@@ -1039,9 +1039,13 @@ void generic_delete_inode(struct inode *inode)
 {
 	const struct super_operations *op = inode->i_sb->s_op;
 
+    //delete the inode from usage list
 	list_del_init(&inode->i_list);
+    //delete the inode from sb->s_inodes
 	list_del_init(&inode->i_sb_list);
+    //the state of this inode is freeing
 	inode->i_state |= I_FREEING;
+    //decrease the number of inodes in system 
 	inodes_stat.nr_inodes--;
 	spin_unlock(&inode_lock);
 

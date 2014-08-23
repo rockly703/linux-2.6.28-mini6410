@@ -177,6 +177,7 @@ static void put_super(struct super_block *sb)
 void deactivate_super(struct super_block *s)
 {
 	struct file_system_type *fs = s->s_type;
+	//if there is no active sb, s_count must be -= S_BIAS-1
 	if (atomic_dec_and_lock(&s->s_active, &sb_lock)) {
 		s->s_count -= S_BIAS-1;
 		spin_unlock(&sb_lock);
