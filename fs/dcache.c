@@ -700,7 +700,7 @@ static void shrink_dcache_for_umount_subtree(struct dentry *dentry)
 				else
 					iput(inode);
 			}
-
+            //free dentry's pointer
 			d_free(dentry);
 
 			/* finished when we fall off the top of the tree,
@@ -748,6 +748,7 @@ void shrink_dcache_for_umount(struct super_block *sb)
 	atomic_dec(&dentry->d_count);
 	shrink_dcache_for_umount_subtree(dentry);
 
+    //free anonymous dentry
 	while (!hlist_empty(&sb->s_anon)) {
 		dentry = hlist_entry(sb->s_anon.first, struct dentry, d_hash);
 		shrink_dcache_for_umount_subtree(dentry);

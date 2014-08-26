@@ -291,11 +291,13 @@ void generic_shutdown_super(struct super_block *sb)
 	const struct super_operations *sop = sb->s_op;
 
 	if (sb->s_root) {
+        //delete all the dentry attached to this sb
 		shrink_dcache_for_umount(sb);
 		fsync_super(sb);
 		lock_super(sb);
 		sb->s_flags &= ~MS_ACTIVE;
 		/* bad name - it should be evict_inodes() */
+        //free the inode with 0 refcnt attached to the sb
 		invalidate_inodes(sb);
 		lock_kernel();
 
