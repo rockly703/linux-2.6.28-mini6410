@@ -148,6 +148,7 @@ static void dentry_lru_del(struct dentry *dentry)
 	}
 }
 
+//remove dentry from lru list
 static void dentry_lru_del_init(struct dentry *dentry)
 {
 	if (likely(!list_empty(&dentry->d_lru))) {
@@ -616,9 +617,12 @@ void shrink_dcache_sb(struct super_block * sb)
  * - see the comments on shrink_dcache_for_umount() for a description of the
  *   locking
  */
+//dcache has two parts:1.hlist 2.lru list
+//always find and delete the left-most(first child) dentry
 static void shrink_dcache_for_umount_subtree(struct dentry *dentry)
 {
 	struct dentry *parent;
+    //record the number of freed dentries
 	unsigned detached = 0;
 
 	BUG_ON(!IS_ROOT(dentry));
@@ -641,7 +645,9 @@ static void shrink_dcache_for_umount_subtree(struct dentry *dentry)
 			spin_lock(&dcache_lock);
 			list_for_each_entry(loop, &dentry->d_subdirs,
 					    d_u.d_child) {
+                //delete dentry in lru list
 				dentry_lru_del_init(loop);
+                //remove dentry from hash list
 				__d_drop(loop);
 				cond_resched_lock(&dcache_lock);
 			}
@@ -657,6 +663,7 @@ static void shrink_dcache_for_umount_subtree(struct dentry *dentry)
 		do {
 			struct inode *inode;
 
+            //we want to free dentry in this loop, if dentry->d_count != 0, there must be something wrong
 			if (atomic_read(&dentry->d_count) != 0) {
 				printk(KERN_ERR
 				       "BUG: Dentry %p{i=%lx,n=%s}"
@@ -676,6 +683,7 @@ static void shrink_dcache_for_umount_subtree(struct dentry *dentry)
 				parent = NULL;
 			else {
 				parent = dentry->d_parent;
+                //if child dentry freed, it's parent's d_count should be decreased
 				atomic_dec(&parent->d_count);
 			}
 
@@ -685,6 +693,7 @@ static void shrink_dcache_for_umount_subtree(struct dentry *dentry)
 			inode = dentry->d_inode;
 			if (inode) {
 				dentry->d_inode = NULL;
+                //detach dentry from inode's i_dentry list
 				list_del_init(&dentry->d_alias);
 				if (dentry->d_op && dentry->d_op->d_iput)
 					dentry->d_op->d_iput(dentry, inode);
@@ -702,8 +711,10 @@ static void shrink_dcache_for_umount_subtree(struct dentry *dentry)
 
 			dentry = parent;
 
+        //if dentry has no child, continue
 		} while (list_empty(&dentry->d_subdirs));
 
+        //if dentry has childs
 		dentry = list_entry(dentry->d_subdirs.next,
 				    struct dentry, d_u.d_child);
 	}
