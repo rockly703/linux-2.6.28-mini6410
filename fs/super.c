@@ -830,6 +830,11 @@ void kill_block_super(struct super_block *sb)
 EXPORT_SYMBOL(kill_block_super);
 #endif
 
+/**
+ * get_sb_nodev - get the fs_type's sb, if the fs of this fs_type
+ * has been moounted in deferent place, there is one sb for each 
+ * mount.
+ */
 int get_sb_nodev(struct file_system_type *fs_type,
 	int flags, void *data,
 	int (*fill_super)(struct super_block *, void *, int),
@@ -860,6 +865,16 @@ static int compare_single(struct super_block *s, void *p)
 	return 1;
 }
 
+/**
+ * get_sb_single - get the fs_type's sb, even if the fs of this 
+ * fs_type has been mounted in deferent place, there is only one sb 
+ * for fs_type. 
+ *  
+ * If there is no sb for fs_type, use sget to get one, this is the 
+ * same with get_sb_nodev, but if there is a sb for fs_type 
+ * get_sb_single will not alloc any sb anymore. It will use the 
+ * exited sb. 
+ */
 int get_sb_single(struct file_system_type *fs_type,
 	int flags, void *data,
 	int (*fill_super)(struct super_block *, void *, int),
@@ -872,6 +887,8 @@ int get_sb_single(struct file_system_type *fs_type,
 	if (IS_ERR(s))
 		return PTR_ERR(s);
 	if (!s->s_root) {
+        //use s->s_root to identify this sb is new allocated one or exited one
+        //if sb is new allocated, it is necessary to fill it, the oppisite is not
 		s->s_flags = flags;
 		error = fill_super(s, data, flags & MS_SILENT ? 1 : 0);
 		if (error) {
@@ -881,6 +898,7 @@ int get_sb_single(struct file_system_type *fs_type,
 		}
 		s->s_flags |= MS_ACTIVE;
 	}
+    //change mount flag
 	do_remount_sb(s, flags, data, 0);
 	return simple_set_mnt(mnt, s);
 }

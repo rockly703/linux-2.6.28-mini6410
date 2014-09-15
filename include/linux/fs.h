@@ -1124,6 +1124,7 @@ struct super_block {
 	//the semaphore which is used in umounting
 	struct rw_semaphore	s_umount;
 	struct mutex		s_lock;
+    //keep the value with 0x40000000, when s_active bigger than 0
 	int			s_count;
 	int			s_need_sync_fs;
 	atomic_t		s_active;
