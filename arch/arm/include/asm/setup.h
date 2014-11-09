@@ -223,6 +223,7 @@ struct meminfo {
 /*
  * Early command line parameters.
  */
+//Every arg has a fn to deal with it's data
 struct early_params {
 	const char *arg;
 	void (*fn)(char **p);

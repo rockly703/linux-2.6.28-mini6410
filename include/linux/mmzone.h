@@ -628,7 +628,7 @@ typedef struct pglist_data {
      * alternatives for memery allocation.The further back an entry on the list,
      * the less suitable it is.
     */
-	str zonelist node_zonelists[MAX_ZONELISTS];
+	struct zonelist node_zonelists[MAX_ZONELISTS];
 	int nr_zones;
 #ifdef CONFIG_FLAT_NODE_MEM_MAP	/* means !SPARSEMEM */
     /*
