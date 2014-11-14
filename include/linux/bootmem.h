@@ -30,7 +30,6 @@ extern unsigned long saved_max_pfn;
 typedef struct bootmem_data {
 	//node_min_pfn holds the number of the first page in the system;this is zero for most architectures.
 	unsigned long node_min_pfn;
-	unsigned long node_low_pfn;
 	/*
 	 * node_low_pfn is the number of the last page of the physical address space
 	 * that can be managed directly,in other words,it is the end of ZONE_NORMAL.
